@@ -43,11 +43,9 @@ function MileTable({ runners, timeOfDay }) {
             ...runners.map((r, i) => {
               const t = MM.timeAtMile(r, mile);
               if (!t) return React.createElement('td', { key: r.id, className: 'runner-col' }, '—');
-              const passed = timeOfDay > t.latest;
               const next = timeOfDay >= t.earliest && timeOfDay <= t.latest;
               let cls = 'time-cell';
-              if (passed) cls += ' passed';
-              else if (next) cls += ' next';
+              if (next) cls += ' next';
               return React.createElement('td', { key: r.id, className: 'runner-col' },
                 React.createElement('div', { className: cls },
                   React.createElement('span', { className: 'time-range' },

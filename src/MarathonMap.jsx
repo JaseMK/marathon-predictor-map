@@ -64,18 +64,14 @@ function MarathonMap({ runners, timeOfDay }) {
       let html = `<div class="mile-tooltip-inner"><div class="mtt-mile">Mile ${mile === 26.2 ? '26.2 — Finish' : mile}</div>`;
       const valid = rs.filter(r => MM.timeAtMile(r, mile));
       if (valid.length > 0) {
-        html += `<div class="mtt-header"><span></span><span>Best</span><span>Avg</span><span>Worst</span></div>`;
         valid.forEach(r => {
           const t = MM.timeAtMile(r, mile);
-          const avg = (t.earliest + t.latest) / 2;
           const c = r.color || '#888';
           html +=
             `<div class="mtt-row">` +
             `<span class="mtt-swatch" style="background:${c}"></span>` +
             `<span class="mtt-name">${r.name || 'Runner'}</span>` +
-            `<span class="mtt-time">${MM.fmtTimeOfDay(t.earliest)}</span>` +
-            `<span class="mtt-time">${MM.fmtTimeOfDay(avg)}</span>` +
-            `<span class="mtt-time mtt-worst">${MM.fmtTimeOfDay(t.latest)}</span>` +
+            `<span class="mtt-time">${MM.fmtTimeOfDay(t.earliest)} – ${MM.fmtTimeOfDay(t.latest)}</span>` +
             `</div>`;
         });
       }

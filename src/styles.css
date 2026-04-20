@@ -307,7 +307,6 @@ html, body {
 
 .time-cell { display: flex; gap: 6px; align-items: baseline; font-variant-numeric: tabular-nums; }
 .time-range { color: var(--ink); }
-.time-cell.passed { opacity: 0.5; text-decoration: line-through; }
 .time-cell.next { color: var(--accent); font-weight: 600; }
 
 /* ============ Leaflet ============ */
@@ -347,22 +346,10 @@ html, body {
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
-.mtt-header {
-  display: grid;
-  grid-template-columns: 10px 1fr repeat(3, 44px);
-  gap: 4px;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 2px;
-  padding-right: 2px;
-}
 .mtt-row {
-  display: grid;
-  grid-template-columns: 10px 1fr repeat(3, 44px);
-  gap: 4px;
+  display: flex;
   align-items: center;
+  gap: 6px;
   padding: 1px 0;
 }
 .mtt-swatch {
@@ -378,13 +365,11 @@ html, body {
   text-overflow: ellipsis;
 }
 .mtt-time {
+  margin-left: auto;
   font-family: var(--mono);
   font-size: 10px;
   color: rgba(255,255,255,0.85);
-  text-align: right;
-}
-.mtt-worst {
-  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
 }
 
 
