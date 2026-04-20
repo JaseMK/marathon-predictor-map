@@ -6,6 +6,9 @@ function MarathonMap({ runners, timeOfDay }) {
   const mapInstance = useRef(null);
   const runnerLayer = useRef(null);
   const staticLayer = useRef(null);
+  // Keep a live ref to runners so static-layer tooltip functions always see current data
+  const runnersRef = useRef(runners);
+  useEffect(() => { runnersRef.current = runners; }, [runners]);
 
   // Init map once
   useEffect(() => {
@@ -33,7 +36,7 @@ function MarathonMap({ runners, timeOfDay }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Draw static route, mile dots, landmarks — once
+  // Draw static route, mile dots, start/finish flags — once
   useEffect(() => {
     const map = mapInstance.current;
     if (!map || !staticLayer.current) return;
@@ -47,79 +50,67 @@ function MarathonMap({ runners, timeOfDay }) {
     L.polyline(latlngs, { color: '#2b6cb0', weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' })
       .addTo(staticLayer.current);
 
-    // Mile dots — interactive, label appears on hover
+    // Mile dots — tooltip built dynamically from runnersRef so it always reflects
+    // the current runner list without needing to redraw the static layer
+    const mileDotIcon = L.divIcon({
+      className: '',
+      html: '<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid #4a5159;box-sizing:border-box;"></div>',
+      iconSize: [8, 8],
+      iconAnchor: [4, 4]
+    });
+
+    function buildMileTooltip(mile) {
+      const rs = runnersRef.current;
+      let html = `<div class="mile-tooltip-inner"><div class="mtt-mile">Mile ${mile === 26.2 ? '26.2 — Finish' : mile}</div>`;
+      const valid = rs.filter(r => MM.timeAtMile(r, mile));
+      if (valid.length > 0) {
+        html += `<div class="mtt-header"><span></span><span>Best</span><span>Avg</span><span>Worst</span></div>`;
+        valid.forEach(r => {
+          const t = MM.timeAtMile(r, mile);
+          const avg = (t.earliest + t.latest) / 2;
+          const c = r.color || '#888';
+          html +=
+            `<div class="mtt-row">` +
+            `<span class="mtt-swatch" style="background:${c}"></span>` +
+            `<span class="mtt-name">${r.name || 'Runner'}</span>` +
+            `<span class="mtt-time">${MM.fmtTimeOfDay(t.earliest)}</span>` +
+            `<span class="mtt-time">${MM.fmtTimeOfDay(avg)}</span>` +
+            `<span class="mtt-time mtt-worst">${MM.fmtTimeOfDay(t.latest)}</span>` +
+            `</div>`;
+        });
+      }
+      html += '</div>';
+      return html;
+    }
+
     for (let m = 1; m <= 26; m++) {
       const pos = positionAtMile(m);
       L.marker([pos[1], pos[0]], {
-        icon: L.divIcon({
-          className: '',
-          html: '<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid #4a5159;box-sizing:border-box;"></div>',
-          iconSize: [8, 8],
-          iconAnchor: [4, 4]
-        }),
-        interactive: true,
-        zIndexOffset: 100
-      }).bindTooltip('Mile ' + m, {
-        direction: 'top',
-        offset: [0, -6],
-        className: 'mile-tooltip'
+        icon: mileDotIcon, interactive: true, zIndexOffset: 100
+      }).bindTooltip(() => buildMileTooltip(m), {
+        direction: 'top', offset: [0, -6], className: 'mile-tooltip'
       }).addTo(staticLayer.current);
     }
-    // Finish dot
+    // Finish dot (26.2)
     const finishPos = positionAtMile(26.2);
     L.marker([finishPos[1], finishPos[0]], {
-      icon: L.divIcon({
-        className: '',
-        html: '<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid #4a5159;box-sizing:border-box;"></div>',
-        iconSize: [8, 8],
-        iconAnchor: [4, 4]
-      }),
-      interactive: true,
-      zIndexOffset: 100
-    }).bindTooltip('Mile 26.2 — Finish', {
+      icon: mileDotIcon, interactive: true, zIndexOffset: 100
+    }).bindTooltip(() => buildMileTooltip(26.2), {
       direction: 'top', offset: [0, -6], className: 'mile-tooltip'
     }).addTo(staticLayer.current);
 
     // Start flag
     const startPos = positionAtMile(0);
     L.marker([startPos[1], startPos[0]], {
-      icon: L.divIcon({
-        className: 'mm-label',
-        html: '<div class="flag-marker">Start</div>',
-        iconSize: [0, 0], iconAnchor: [0, 0]
-      }),
+      icon: L.divIcon({ className: 'mm-label', html: '<div class="flag-marker">Start</div>', iconSize: [0, 0], iconAnchor: [0, 0] }),
       zIndexOffset: 600
     }).addTo(staticLayer.current);
 
     // Finish flag
     L.marker([finishPos[1], finishPos[0]], {
-      icon: L.divIcon({
-        className: 'mm-label',
-        html: '<div class="flag-marker finish">Finish</div>',
-        iconSize: [0, 0], iconAnchor: [0, 0]
-      }),
+      icon: L.divIcon({ className: 'mm-label', html: '<div class="flag-marker finish">Finish</div>', iconSize: [0, 0], iconAnchor: [0, 0] }),
       zIndexOffset: 600
     }).addTo(staticLayer.current);
-
-    // Landmark labels
-    [
-      [6.5,  'Cutty Sark'],
-      [12,   'Tower Bridge'],
-      [18.5, 'Canary Wharf'],
-      [22.5, 'Tower of London'],
-      [25,   'Big Ben']
-    ].forEach(([mi, label]) => {
-      const pos = positionAtMile(mi);
-      L.marker([pos[1], pos[0]], {
-        icon: L.divIcon({
-          className: 'mm-label',
-          html: '<div class="landmark-marker">' + label + '</div>',
-          iconSize: [0, 0], iconAnchor: [0, 0]
-        }),
-        interactive: false,
-        zIndexOffset: 300
-      }).addTo(staticLayer.current);
-    });
   }, []);
 
   // Update runner markers on every tick
@@ -147,7 +138,7 @@ function MarathonMap({ runners, timeOfDay }) {
         bandPts.unshift([wp[1], wp[0]]);
         bandPts.push([bp[1], bp[0]]);
         if (bandPts.length > 1) {
-          L.polyline(bandPts, { color, weight: 6, opacity: 0.35, lineCap: 'round' })
+          L.polyline(bandPts, { color, weight: 6, opacity: 0.65, lineCap: 'round' })
             .addTo(runnerLayer.current);
         }
       }
