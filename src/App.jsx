@@ -1,13 +1,6 @@
 /* global React, ReactDOM, L */
 const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
-const DEFAULT_TWEAKS = /*EDITMODE-BEGIN*/{
-  "aesthetic": "clean",
-  "mapStyle": "positron",
-  "showLandmarks": true,
-  "showMileLabels": true
-}/*EDITMODE-END*/;
-
 function newRunnerId() { return 'r_' + Math.random().toString(36).slice(2, 8); }
 
 const SAMPLE_RUNNER = {
@@ -32,13 +25,10 @@ function App() {
       const saved = localStorage.getItem('mm_time');
       if (saved) return parseInt(saved, 10);
     } catch(e) {}
-    return 10 * 3600 + 45 * 60; // 10:45 default
+    return 10 * 3600 + 45 * 60;
   });
   const [playing, setPlaying] = useState(false);
-  const [tweaksOpen, setTweaksOpen] = useState(false);
-  const [tweaks, setTweaks] = useState(DEFAULT_TWEAKS);
 
-  // Persist
   useEffect(() => {
     try { localStorage.setItem('mm_runners', JSON.stringify(runners)); } catch(e) {}
   }, [runners]);
@@ -46,36 +36,11 @@ function App() {
     try { localStorage.setItem('mm_time', String(timeOfDay)); } catch(e) {}
   }, [timeOfDay]);
 
-  // Apply aesthetic to body
-  useEffect(() => {
-    document.body.className = '';
-    if (tweaks.aesthetic && tweaks.aesthetic !== 'clean') {
-      document.body.classList.add('aes-' + tweaks.aesthetic);
-    }
-  }, [tweaks.aesthetic]);
-
-  // Tweaks plumbing
-  useEffect(() => {
-    const onMsg = (e) => {
-      if (!e.data || typeof e.data !== 'object') return;
-      if (e.data.type === '__activate_edit_mode') setTweaksOpen(true);
-      if (e.data.type === '__deactivate_edit_mode') setTweaksOpen(false);
-    };
-    window.addEventListener('message', onMsg);
-    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
-    return () => window.removeEventListener('message', onMsg);
-  }, []);
-  const updateTweak = (key, val) => {
-    setTweaks(t => ({ ...t, [key]: val }));
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: val } }, '*');
-  };
-
-  // Auto-play
   useEffect(() => {
     if (!playing) return;
     const id = setInterval(() => {
       setTimeOfDay(t => {
-        const next = t + 60; // +1 min per tick
+        const next = t + 60;
         if (next > 18 * 3600) { setPlaying(false); return 18*3600; }
         return next;
       });
@@ -93,15 +58,14 @@ function App() {
       color: MM.colorFor(rs.length)
     }]);
   };
-  const updateRunner = (r) => setRunners(rs => rs.map(x => x.id === r.id ? r : x));
-  const removeRunner = (id) => setRunners(rs => rs.filter(x => x.id !== id));
+  const updateRunner = r => setRunners(rs => rs.map(x => x.id === r.id ? r : x));
+  const removeRunner = id => setRunners(rs => rs.filter(x => x.id !== id));
 
-  // Slider range: 8:00 to 17:00 (race window with buffer)
   const SLIDER_MIN = 8 * 3600;
   const SLIDER_MAX = 17 * 3600;
 
   return React.createElement('div', { className: 'app' },
-    // ---- Header ----
+    // Header
     React.createElement('div', { className: 'header' },
       React.createElement('div', { className: 'brand' },
         React.createElement('div', { className: 'brand-mark' }, 'M'),
@@ -115,7 +79,7 @@ function App() {
         'Sun 26 Apr 2026'
       )
     ),
-    // ---- Sidebar ----
+    // Sidebar
     React.createElement('div', { className: 'sidebar' },
       React.createElement('div', { className: 'sidebar-header' },
         React.createElement('div', { className: 'sidebar-title' }, 'Runners · ' + runners.length),
@@ -132,10 +96,10 @@ function App() {
             }))
       )
     ),
-    // ---- Main ----
+    // Main map + time bar
     React.createElement('div', { className: 'main' },
       React.createElement('div', { className: 'map-wrap' },
-        React.createElement(MarathonMap, { runners, timeOfDay, mapStyle: tweaks.mapStyle })
+        React.createElement(MarathonMap, { runners, timeOfDay })
       ),
       React.createElement('div', { className: 'time-bar' },
         React.createElement('div', { className: 'time-display' },
@@ -156,7 +120,7 @@ function App() {
             className: 'time-slider',
             min: SLIDER_MIN, max: SLIDER_MAX, step: 60,
             value: timeOfDay,
-            onChange: (e) => setTimeOfDay(parseInt(e.target.value, 10))
+            onChange: e => setTimeOfDay(parseInt(e.target.value, 10))
           })
         ),
         React.createElement('div', { className: 'time-controls' },
@@ -177,39 +141,8 @@ function App() {
         )
       )
     ),
-    // ---- Table ----
-    React.createElement(MileTable, { runners, timeOfDay }),
-    // ---- Tweaks ----
-    React.createElement('div', { className: 'tweaks-panel' + (tweaksOpen ? ' open' : '') },
-      React.createElement('div', { className: 'tweaks-head' },
-        React.createElement('div', { className: 'tweaks-title' }, 'Tweaks'),
-        React.createElement('button', { className: 'tweaks-close', onClick: () => setTweaksOpen(false) }, '×')
-      ),
-      React.createElement('div', { className: 'tweak-row' },
-        React.createElement('label', null, 'Aesthetic'),
-        React.createElement('div', { className: 'tweak-options' },
-          ['clean', 'sporty', 'editorial', 'dark'].map(v =>
-            React.createElement('button', {
-              key: v,
-              className: 'tweak-opt' + (tweaks.aesthetic === v ? ' active' : ''),
-              onClick: () => updateTweak('aesthetic', v)
-            }, v)
-          )
-        )
-      ),
-      React.createElement('div', { className: 'tweak-row' },
-        React.createElement('label', null, 'Basemap'),
-        React.createElement('div', { className: 'tweak-options' },
-          [['positron', 'Light'], ['voyager', 'Muted'], ['dark', 'Dark']].map(([v,lbl]) =>
-            React.createElement('button', {
-              key: v,
-              className: 'tweak-opt' + (tweaks.mapStyle === v ? ' active' : ''),
-              onClick: () => updateTweak('mapStyle', v)
-            }, lbl)
-          )
-        )
-      )
-    )
+    // Mile table
+    React.createElement(MileTable, { runners, timeOfDay })
   );
 }
 
