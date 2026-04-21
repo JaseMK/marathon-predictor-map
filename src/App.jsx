@@ -85,7 +85,7 @@ function App() {
       const saved = localStorage.getItem('mm_time');
       if (saved) return parseInt(saved, 10);
     } catch(e) {}
-    return 10 * 3600 + 45 * 60;
+    return 9 * 3600;
   });
   const [playing, setPlaying] = useState(false);
   const [detailRunner, setDetailRunner] = useState(null);

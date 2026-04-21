@@ -154,8 +154,27 @@ function MarathonMap({ runners, timeOfDay, showTubeStations }) {
 
     runners.forEach((runner, idx) => {
       const info = MM.milesAt(runner, timeOfDay);
-      if (!info || info.status === 'pre') return;
+      if (!info) return; // parse failure — can't place on map
       const color = runner.color || MM.colorFor(idx);
+
+      // Pre-start: pin runner at the start line, faded
+      if (info.status === 'pre') {
+        const startPos = positionAtMile(0);
+        const ll = [startPos[1], startPos[0]];
+        const size = 16;
+        const anchor = size / 2;
+        const startTime = MM.fmtTimeOfDay(MM.parseTime(runner.waveStart));
+        const waitStr = MM.fmtDuration(-info.elapsed);
+        const nameTag = `<div style="position:absolute;bottom:${size + 4}px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;font-family:var(--sans,sans-serif);box-shadow:0 1px 3px rgba(0,0,0,0.2);pointer-events:none;opacity:0.65;">${runner.name || 'Runner'}</div>`;
+        const html = `<div style="position:relative;width:${size}px;height:${size}px;"><div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.2),0 2px 4px rgba(0,0,0,0.2);opacity:0.35;"></div>${nameTag}</div>`;
+        const tooltipHtml = `<div class="runner-tooltip-inner"><div class="rtt-name">${runner.name || 'Runner'}</div><div class="rtt-row"><span class="rtt-label">Status</span><span>Not started</span></div><div class="rtt-row"><span class="rtt-label">Wave</span><span>${startTime}</span></div><div class="rtt-row"><span class="rtt-label">Starts in</span><span>${waitStr}</span></div></div>`;
+        L.marker(ll, {
+          icon: L.divIcon({ className: '', html, iconSize: [size, size], iconAnchor: [anchor, anchor] }),
+          zIndexOffset: 700, interactive: true
+        }).bindTooltip(tooltipHtml, { direction: 'top', offset: [0, -(anchor + 6)], className: 'runner-tooltip' })
+          .addTo(runnerLayer.current);
+        return;
+      }
 
       // Uncertainty band
       if (info.status !== 'finished') {
