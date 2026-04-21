@@ -157,7 +157,7 @@ function App() {
     setEditDrawer({ ...runner, _exists: true });
   };
 
-  const SLIDER_MIN = 8 * 3600;
+  const SLIDER_MIN = 9 * 3600;
   const SLIDER_MAX = 17 * 3600;
 
   return React.createElement('div', { className: 'app' },
@@ -179,7 +179,7 @@ function App() {
           React.createElement('span', { className: 'tube-toggle-roundel' },
             React.createElement('span', { className: 'tube-toggle-bar' })
           ),
-          'Tube'
+          'Tube stations'
         ),
         React.createElement('div', { className: 'race-date' },
           React.createElement('span', { className: 'dot' }),
@@ -222,7 +222,7 @@ function App() {
         ),
         React.createElement('div', { className: 'time-slider-wrap' },
           React.createElement('div', { className: 'time-ticks' },
-            [8,9,10,11,12,13,14,15,16,17].map(h => {
+            [9,10,11,12,13,14,15,16,17].map(h => {
               const pct = ((h * 3600 - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN)) * 100;
               return React.createElement('div', {
                 key: h, className: 'time-tick', style: { left: pct + '%' }
