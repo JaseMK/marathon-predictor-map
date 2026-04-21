@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marathon Spectator Map · Mobile</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="src/styles.css" />
+<style>
+  body {
+    background: #efece5;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+  .canvas-head {
+    max-width: 1200px;
+    margin: 0 auto 32px;
+    font-family: ui-sans-serif, -apple-system, 'Helvetica Neue', sans-serif;
+    color: #1a1d21;
+  }
+  .canvas-head h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .canvas-head p {
+    margin: 0;
+    color: #8a9098;
+    font-size: 13px;
+    max-width: 720px;
+  }
+  .phones {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0 auto;
+  }
+  .phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .phone-label {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    color: #8a9098;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* === Mobile App styles (scoped to .mobile) === */
+  .mobile {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #f7f6f2;
+    font-family: -apple-system, system-ui, sans-serif;
+    color: #1a1d21;
+    font-size: 14px;
+    position: relative;
+  }
+  .mobile .m-header {
+    padding: 54px 16px 10px;
+    background: #fff;
+    border-bottom: 1px solid #e6e3dc;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .mobile .m-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .mobile .m-subtitle {
+    font-size: 11px;
+    color: #8a9098;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    margin-top: 2px;
+  }
+  .mobile .m-header-right {
+    display: flex;
+    gap: 6px;
+  }
+  .mobile .m-icon-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: #f0ede6;
+    border: none;
+    display: grid; place-items: center;
+    font-size: 16px;
+    color: #4a5159;
+  }
+  .mobile .m-map-wrap {
+    flex: 1;
+    position: relative;
+    background: #d4d0c7;
+  }
+  .mobile .m-map { width: 100%; height: 100%; }
+
+  /* Time bar overlay on map */
+  .mobile .m-timebar {
+    position: absolute;
+    top: 12px; left: 12px; right: 12px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mobile .m-timebar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mobile .m-time {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile .m-time-label {
+    font-size: 10px;
+    color: #8a9098;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 1px;
+  }
+  .mobile .m-play {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #1a1d21; color: white;
+    border: none; font-size: 10px;
+    display: grid; place-items: center;
+  }
+  .mobile .m-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 3px;
+    background: #e6e3dc;
+    border-radius: 2px;
+    margin: 2px 0;
+  }
+  .mobile .m-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: #1a1d21;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px #1a1d21;
+    border-radius: 50%;
+  }
+
+  /* Bottom sheet with runners */
+  .mobile .m-sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    z-index: 500;
+    padding: 10px 0 34px;
+    max-height: 52%;
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile .m-sheet-grip {
+    width: 40px; height: 4px; border-radius: 2px;
+    background: #d4d0c7;
+    margin: 0 auto 8px;
+  }
+  .mobile .m-sheet-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px 10px;
+    border-bottom: 1px solid #e6e3dc;
+  }
+  .mobile .m-sheet-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a9098;
+  }
+  .mobile .m-add-btn {
+    background: #1a1d21;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .mobile .m-runners {
+    overflow-y: auto;
+    padding: 6px 0 0;
+  }
+  .mobile .m-runner {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    gap: 12px;
+    border-bottom: 1px solid #f0ede6;
+  }
+  .mobile .m-swatch {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 1px currentColor;
+    flex-shrink: 0;
+  }
+  .mobile .m-runner-body { flex: 1; min-width: 0; }
+  .mobile .m-runner-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  .mobile .m-runner-stat {
+    font-size: 12px;
+    color: #4a5159;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  .mobile .m-runner-stat .muted { color: #8a9098; }
+  .mobile .m-chevron {
+    color: #8a9098;
+    font-size: 16px;
+  }
+
+  /* Tab bar */
+  .mobile .m-tabbar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid #e6e3dc;
+    display: flex;
+    padding-bottom: 18px;
+    z-index: 600;
+  }
+  .mobile .m-tab {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    font-size: 10px;
+    color: #8a9098;
+    font-weight: 500;
+  }
+  .mobile .m-tab.active { color: #1a1d21; }
+  .mobile .m-tab-icon {
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    font-size: 18px;
+  }
+
+  /* Detail view */
+  .mobile.detail .d-hero {
+    padding: 54px 20px 16px;
+    background: white;
+    border-bottom: 1px solid #e6e3dc;
+  }
+  .mobile.detail .d-back {
+    color: #4a5159;
+    font-size: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .mobile.detail .d-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .mobile.detail .d-swatch {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 0 0 1px currentColor;
+  }
+  .mobile.detail .d-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 2px;
+  }
+  .mobile.detail .d-where {
+    font-size: 12px;
+    color: #8a9098;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  .mobile.detail .d-now-card {
+    background: #f7f6f2;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    gap: 16px;
+  }
+  .mobile.detail .d-now-block {
+    flex: 1;
+  }
+  .mobile.detail .d-now-label {
+    font-size: 10px;
+    color: #8a9098;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .mobile.detail .d-now-val {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .mobile.detail .d-now-sub {
+    font-size: 11px;
+    color: #8a9098;
+    margin-top: 2px;
+  }
+  .mobile.detail .d-now-divider {
+    width: 1px; background: #e6e3dc;
+  }
+  .mobile.detail .d-section {
+    padding: 16px 20px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a9098;
+  }
+  .mobile.detail .d-miles {
+    padding: 0 0 30px;
+  }
+  .mobile.detail .d-mile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
+    border-bottom: 1px solid #f0ede6;
+    background: white;
+  }
+  .mobile.detail .d-mile.passed { opacity: 0.5; }
+  .mobile.detail .d-mile.current { background: color-mix(in oklab, currentColor 10%, white); }
+  .mobile.detail .d-mile-num {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5159;
+    width: 34px;
+  }
+  .mobile.detail .d-mile-num.landmark { color: currentColor; }
+  .mobile.detail .d-mile-body { flex: 1; min-width: 0; }
+  .mobile.detail .d-mile-landmark {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .mobile.detail .d-mile-landmark.generic { color: #8a9098; font-weight: 400; font-style: italic; }
+  .mobile.detail .d-mile-range {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 13px;
+    color: #1a1d21;
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile.detail .d-mile.passed .d-mile-range { text-decoration: line-through; }
+  .mobile.detail .d-mile.current .d-mile-range { color: currentColor; font-weight: 700; }
+
+  /* Leaflet-specific mobile tweaks */
+  .mobile .leaflet-control-attribution { display: none; }
+  .mobile .leaflet-control-zoom { display: none; }
+  .mobile .leaflet-tile-pane { filter: saturate(0.65) brightness(1.04); }
+</style>
+</head>
+<body>
+
+<div class="canvas-head">
+  <h1>Marathon Spectator Map · Mobile</h1>
+  <p>Responsive companion view for race day. Map takes the full viewport; runners collapse into a bottom sheet. Tap a runner to open a detailed mile-by-mile schedule.</p>
+</div>
+
+<div class="phones" id="phones"></div>
+
+<script src="src/routeData.js"></script>
+<script src="src/helpers.js"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const SAMPLE_RUNNERS = [
+  { id: 'r1', name: 'Sam',    waveStart: '10:00', bestTime: '3:45:00', worstTime: '4:30:00', color: '#a855f7' },
+  { id: 'r2', name: 'Priya',  waveStart: '10:10', bestTime: '3:20:00', worstTime: '3:50:00', color: '#ef4444' },
+  { id: 'r3', name: 'Marcus', waveStart: '10:25', bestTime: '4:15:00', worstTime: '5:00:00', color: '#10b981' }
+];
+const NOW = 11 * 3600 + 30 * 60; // 11:30 fixed time for mock
+
+// ======= Mobile Map =======
+function MobileMap({ runners, timeOfDay }) {
+  const mapRef = useRef(null);
+  const mapInst = useRef(null);
+
+  useEffect(() => {
+    if (mapInst.current) return;
+    const map = L.map(mapRef.current, {
+      zoomControl: false, attributionControl: false, dragging: false,
+      touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false,
+      tap: false
+    }).setView([51.502, -0.060], 11);
+    mapInst.current = map;
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd', maxZoom: 19
+    }).addTo(map);
+
+    const latlngs = LONDON_MARATHON_ROUTE.map(p => [p[1], p[0]]);
+    L.polyline(latlngs, { color: 'white', weight: 9, opacity: 0.95, lineCap: 'round' }).addTo(map);
+    L.polyline(latlngs, { color: '#2b6cb0', weight: 4, opacity: 0.85, lineCap: 'round' }).addTo(map);
+
+    // Mile markers at 5/10/15/20/25
+    [5,10,13,15,20,25].forEach(m => {
+      const p = positionAtMile(m);
+      L.marker([p[1], p[0]], {
+        icon: L.divIcon({
+          className: '',
+          html: `<div style="background:#1a1d21;color:white;padding:2px 5px;border-radius:3px;font-family:ui-monospace,monospace;font-size:9px;font-weight:600;transform:translate(-50%,-150%);white-space:nowrap;">MI ${m}</div>`,
+          iconSize: [0,0]
+        }),
+        interactive: false
+      }).addTo(map);
+    });
+
+    // Start/Finish flags
+    const s = positionAtMile(0), f = positionAtMile(26.2);
+    L.marker([s[1], s[0]], {
+      icon: L.divIcon({ className: '', html: `<div style="background:white;border:2px solid #1a1d21;border-radius:3px;padding:2px 6px;font-family:ui-monospace,monospace;font-size:9px;font-weight:700;transform:translate(-50%,-50%);letter-spacing:0.05em;">START</div>`, iconSize: [0,0] }),
+      interactive: false
+    }).addTo(map);
+    L.marker([f[1], f[0]], {
+      icon: L.divIcon({ className: '', html: `<div style="background:#1a1d21;color:white;border-radius:3px;padding:2px 6px;font-family:ui-monospace,monospace;font-size:9px;font-weight:700;transform:translate(-50%,-50%);letter-spacing:0.05em;">FINISH</div>`, iconSize: [0,0] }),
+      interactive: false
+    }).addTo(map);
+
+    // Fit route
+    const bounds = L.latLngBounds(latlngs);
+    map.fitBounds(bounds, { padding: [24, 24] });
+
+    setTimeout(() => map.invalidateSize(), 80);
+  }, []);
+
+  // Runner markers
+  const markerLayer = useRef(null);
+  useEffect(() => {
+    const map = mapInst.current;
+    if (!map) return;
+    if (markerLayer.current) map.removeLayer(markerLayer.current);
+    markerLayer.current = L.layerGroup().addTo(map);
+
+    runners.forEach(r => {
+      const info = MM.milesAt(r, timeOfDay);
+      if (!info || info.status === 'pre') return;
+      const color = r.color;
+
+      // Uncertainty band
+      const cum = LONDON_MARATHON_CUMULATIVE_MI;
+      const band = [];
+      for (let i = 0; i < cum.length; i++) {
+        if (cum[i] >= info.worst && cum[i] <= info.best) band.push([LONDON_MARATHON_ROUTE[i][1], LONDON_MARATHON_ROUTE[i][0]]);
+      }
+      const wp = positionAtMile(info.worst), bp = positionAtMile(info.best);
+      band.unshift([wp[1], wp[0]]); band.push([bp[1], bp[0]]);
+      if (band.length > 1) L.polyline(band, { color, weight: 7, opacity: 0.4, lineCap: 'round' }).addTo(markerLayer.current);
+
+      [{mi: info.worst, key: 'w'}, {mi: info.best, key: 'b'}, {mi: info.middle, key: 'm'}].forEach(p => {
+        const pos = positionAtMile(p.mi);
+        const isMid = p.key === 'm';
+        const opacity = isMid ? 1 : (p.key === 'b' ? 0.85 : 0.55);
+        const size = isMid ? 14 : 10;
+        L.marker([pos[1], pos[0]], {
+          icon: L.divIcon({
+            className: '',
+            html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.2);opacity:${opacity};transform:translate(-50%,-50%);"></div>`,
+            iconSize: [0,0]
+          }),
+          interactive: false,
+          zIndexOffset: isMid ? 800 : 700
+        }).addTo(markerLayer.current);
+      });
+    });
+  }, [runners, timeOfDay]);
+
+  return <div ref={mapRef} className="m-map" />;
+}
+
+// ======= Screen 1: Map view =======
+function MapScreen() {
+  const [timeOfDay, setTimeOfDay] = useState(NOW);
+  const SLIDER_MIN = 8 * 3600, SLIDER_MAX = 17 * 3600;
+
+  return (
+    <div className="mobile">
+      <div className="m-header">
+        <div>
+          <div className="m-title">Spectator</div>
+          <div className="m-subtitle">Sun 26 Apr · London</div>
+        </div>
+        <div className="m-header-right">
+          <button className="m-icon-btn">⌕</button>
+          <button className="m-icon-btn">⚙</button>
+        </div>
+      </div>
+      <div className="m-map-wrap">
+        <MobileMap runners={SAMPLE_RUNNERS} timeOfDay={timeOfDay} />
+        <div className="m-timebar">
+          <div className="m-timebar-top">
+            <div>
+              <div className="m-time-label">Time of day</div>
+              <div className="m-time">{MM.fmtTimeOfDay(timeOfDay)}</div>
+            </div>
+            <button className="m-play">▶</button>
+          </div>
+          <input type="range" className="m-slider"
+            min={SLIDER_MIN} max={SLIDER_MAX} step={60}
+            value={timeOfDay}
+            onChange={e => setTimeOfDay(parseInt(e.target.value, 10))} />
+        </div>
+
+        <div className="m-sheet">
+          <div className="m-sheet-grip" />
+          <div className="m-sheet-head">
+            <div className="m-sheet-title">Runners · {SAMPLE_RUNNERS.length}</div>
+            <button className="m-add-btn">+ Add</button>
+          </div>
+          <div className="m-runners">
+            {SAMPLE_RUNNERS.map(r => {
+              const info = MM.milesAt(r, timeOfDay);
+              let stat = 'Not started';
+              if (info && info.status === 'running') {
+                stat = `Mile ${info.middle.toFixed(1)}  ·  ±${((info.best-info.worst)/2).toFixed(1)}mi`;
+              } else if (info && info.status === 'finished') {
+                stat = 'Finished';
+              } else if (info && info.status === 'pre') {
+                stat = 'Starts in ' + MM.fmtDuration(-info.elapsed);
+              }
+              return (
+                <div key={r.id} className="m-runner">
+                  <div className="m-swatch" style={{color: r.color, background: r.color}} />
+                  <div className="m-runner-body">
+                    <div className="m-runner-name">{r.name}</div>
+                    <div className="m-runner-stat">{stat}</div>
+                  </div>
+                  <div className="m-chevron">›</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ======= Screen 2: Runner detail =======
+function DetailScreen() {
+  const runner = SAMPLE_RUNNERS[1]; // Priya
+  const info = MM.milesAt(runner, NOW);
+  const rows = [];
+  for (let m = 1; m <= 26; m++) rows.push(m);
+  rows.push(26.2);
+
+  return (
+    <div className="mobile detail" style={{ color: runner.color }}>
+      <div className="d-hero" style={{ color: '#1a1d21' }}>
+        <div className="d-back">‹ Runners</div>
+        <div className="d-head">
+          <div className="d-swatch" style={{ color: runner.color, background: runner.color }} />
+          <div>
+            <div className="d-name">{runner.name}</div>
+            <div className="d-where">Wave 10:10 · Target 3:20–3:50</div>
+          </div>
+        </div>
+        <div className="d-now-card">
+          <div className="d-now-block">
+            <div className="d-now-label">Currently</div>
+            <div className="d-now-val" style={{ color: runner.color }}>
+              Mile {info.middle.toFixed(1)}
+            </div>
+            <div className="d-now-sub">±{((info.best - info.worst)/2).toFixed(1)} mi · Canary Wharf</div>
+          </div>
+          <div className="d-now-divider" />
+          <div className="d-now-block">
+            <div className="d-now-label">Finish ETA</div>
+            <div className="d-now-val">
+              {MM.fmtTimeOfDay(MM.timeAtMile(runner, 26.2).earliest)}
+              <span style={{color:'#8a9098', fontSize: 13}}>–{MM.fmtTimeOfDay(MM.timeAtMile(runner, 26.2).latest).slice(3)}</span>
+            </div>
+            <div className="d-now-sub">The Mall</div>
+          </div>
+        </div>
+      </div>
+      <div className="d-section">Mile-by-mile · {MM.fmtTimeOfDay(NOW)}</div>
+      <div className="d-miles" style={{ color: runner.color }}>
+        {rows.map(m => {
+          const t = MM.timeAtMile(runner, m);
+          const passed = NOW > t.latest;
+          const current = NOW >= t.earliest && NOW <= t.latest;
+          const landmark = LONDON_MARATHON_LANDMARKS[m];
+          return (
+            <div key={m} className={'d-mile' + (passed ? ' passed' : '') + (current ? ' current' : '')}>
+              <div className={'d-mile-num' + (landmark ? ' landmark' : '')}>{m === 26.2 ? '26.2' : m}</div>
+              <div className="d-mile-body">
+                <div className={'d-mile-landmark' + (landmark ? '' : ' generic')} style={{color: landmark ? '#1a1d21' : undefined}}>
+                  {landmark || 'open road'}
+                </div>
+              </div>
+              <div className="d-mile-range">
+                {MM.fmtTimeOfDay(t.earliest)}–{MM.fmtTimeOfDay(t.latest)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ======= Render =======
+function App() {
+  return (
+    <>
+      <div className="phone-col">
+        <IOSDevice width={390} height={780}>
+          <MapScreen />
+        </IOSDevice>
+        <div className="phone-label">Home · Map + Runners</div>
+      </div>
+      <div className="phone-col">
+        <IOSDevice width={390} height={780}>
+          <DetailScreen />
+        </IOSDevice>
+        <div className="phone-label">Runner Detail</div>
+      </div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('phones')).render(<App />);
+</script>
+</body>
+</html>
