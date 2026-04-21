@@ -69,6 +69,11 @@ html, body {
   color: var(--ink-3);
   margin-left: 2px;
 }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .race-date {
   font-family: var(--mono);
   font-size: 12px;
@@ -309,6 +314,88 @@ html, body {
 .time-range { color: var(--ink); }
 .time-cell.next { color: var(--accent); font-weight: 600; }
 
+/* ============ Tube toggle button ============ */
+.btn-tube-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  color: var(--ink-2);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btn-tube-toggle:hover { background: var(--chip); color: var(--ink); }
+.btn-tube-toggle.active {
+  background: #1c3d8f;
+  color: white;
+  border-color: #1c3d8f;
+}
+.tube-toggle-roundel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  position: relative;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.btn-tube-toggle.active .tube-toggle-roundel { border-color: white; opacity: 1; }
+.tube-toggle-bar {
+  display: block;
+  position: absolute;
+  left: -2px; right: -2px;
+  height: 2.5px;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+/* ============ Tube station markers ============ */
+.tube-station-icon {
+  background: none !important;
+  border: none !important;
+  overflow: visible !important;
+}
+.tube-roundel {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2.5px solid #dc241f;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.tube-bar {
+  position: absolute;
+  left: -3px; right: -3px;
+  height: 3px;
+  background: #003888;
+}
+.tube-tooltip {
+  background: white !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+.tube-tooltip::before { display: none !important; }
+.tube-tooltip-inner {
+  padding: 6px 9px;
+  font-family: var(--sans);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.tube-tt-name { font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.tube-tt-lines { color: var(--ink-3); font-size: 10px; }
+
 /* ============ Leaflet ============ */
 .leaflet-container { font-family: var(--sans); background: #e8e4dc; }
 .leaflet-tile-pane { filter: saturate(0.7) brightness(1.02); }
@@ -319,6 +406,13 @@ html, body {
   border: none !important;
   overflow: visible !important;
   position: relative !important;
+}
+
+/* Mile marker icons — overflow visible so label text clears the 8×8 box */
+.mile-marker-icon {
+  background: none !important;
+  border: none !important;
+  overflow: visible !important;
 }
 
 /* Mile hover tooltip */
@@ -432,3 +526,337 @@ html, body {
   letter-spacing: 0.05em;
   padding-top: 1px;
 }
+
+/* ============ Mobile sheet (hidden on desktop) ============ */
+.mobile-sheet { display: none; }
+
+/* ============ Mobile (≤ 768px) ============ */
+@media (max-width: 768px) {
+  /* Layout */
+  html, body { height: 100%; overflow: hidden; }
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+  .header {
+    height: calc(50px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 16px 0;
+    flex-shrink: 0;
+  }
+  .sidebar { display: none; }
+  .table-wrap { display: none; }
+  .main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .map-wrap {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  /* Floating time bar overlay */
+  .time-bar {
+    position: absolute;
+    top: 12px; left: 12px; right: 12px;
+    z-index: 400;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    border-top: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    padding: 10px 14px 12px;
+    gap: 10px;
+  }
+  .time-ticks { display: none; }
+  .time-slider-wrap { padding: 4px 0 0; }
+  .time-display { min-width: 72px; }
+  .time-value { font-size: 22px; }
+  .time-label { font-size: 9px; }
+
+  /* Leaflet — hide zoom control (use pinch) and attribution on mobile */
+  .leaflet-control-zoom { display: none !important; }
+  .leaflet-control-attribution { display: none !important; }
+
+  /* Mobile bottom sheet */
+  .mobile-sheet {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    z-index: 500;
+    max-height: 52%;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-sheet-grip {
+    width: 40px; height: 4px; border-radius: 2px;
+    background: var(--line-2);
+    margin: 10px auto 6px;
+    flex-shrink: 0;
+  }
+  .mobile-sheet-head {
+    display: flex;
+    align-items: center;
+    padding: 0 16px 10px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .mobile-sheet-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    flex: 1;
+  }
+  .mobile-sheet-actions { display: flex; gap: 6px; }
+  .mobile-sheet-btn {
+    border: 1px solid var(--line-2);
+    background: var(--panel);
+    color: var(--ink);
+    padding: 5px 10px;
+    border-radius: 14px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .mobile-sheet-btn.primary {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+  .mobile-sheet-runners {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
+  }
+  .mobile-sheet-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .mobile-runner-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .mobile-runner-row:active { background: var(--chip); }
+  .mobile-runner-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .mobile-runner-body { flex: 1; min-width: 0; }
+  .mobile-runner-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .mobile-runner-stat { font-size: 12px; color: var(--ink-2); font-family: var(--mono); }
+  .mobile-runner-chevron { color: var(--ink-3); font-size: 20px; line-height: 1; }
+}
+
+/* ============ Mobile overlays (JS-controlled, any screen size) ============ */
+.mobile-drawer-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.mobile-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+.mobile-drawer-panel,
+.runner-detail-panel,
+.mobile-overlay-panel {
+  position: relative;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mobile-drawer-grip {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--line-2);
+  margin: 10px auto 6px;
+  flex-shrink: 0;
+}
+.mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.mobile-drawer-title { font-size: 14px; font-weight: 600; }
+.mobile-drawer-cancel {
+  border: none; background: none;
+  color: var(--ink-3); font-size: 14px;
+  cursor: pointer; font-family: var(--sans); padding: 0;
+}
+.mobile-drawer-done {
+  border: none; background: none;
+  color: var(--accent); font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--sans); padding: 0;
+}
+.mobile-drawer-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1; min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mobile-field-group { display: flex; flex-direction: column; gap: 10px; }
+.mobile-field-row { display: flex; align-items: center; gap: 10px; }
+.mobile-field-label {
+  font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-3);
+  font-weight: 500; margin-bottom: 8px; display: block;
+}
+.mobile-drawer-delete {
+  width: 100%; padding: 12px;
+  border: 1px solid #fecaca; background: #fef2f2; color: #dc2626;
+  border-radius: 8px; font-family: var(--sans);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  margin-top: 4px;
+}
+
+/* Mile table overlay */
+.mobile-overlay-panel { max-height: 85vh; }
+.mobile-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.mobile-overlay-title { font-size: 14px; font-weight: 600; }
+.mobile-overlay-close {
+  border: none; background: var(--chip);
+  color: var(--ink-2);
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 13px; cursor: pointer;
+}
+.mobile-overlay-body {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+/* Inside overlay, the table-wrap inner chrome is redundant */
+.mobile-overlay-body .table-head { display: none; }
+.mobile-overlay-body .table-wrap {
+  display: block;
+  max-height: none;
+  border: none;
+}
+
+/* Runner detail */
+.runner-detail-panel { max-height: 92vh; }
+.runner-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.runner-detail-back {
+  border: none; background: none;
+  color: var(--ink-2); font-size: 14px;
+  cursor: pointer; font-family: var(--sans); padding: 0;
+}
+.runner-detail-edit {
+  border: none; background: none;
+  color: var(--accent); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--sans); padding: 0;
+}
+.runner-detail-hero {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.runner-detail-hero-left { display: flex; align-items: center; gap: 14px; }
+.runner-detail-swatch {
+  width: 44px; height: 44px;
+  border-radius: 50%; flex-shrink: 0;
+}
+.runner-detail-name {
+  font-size: 20px; font-weight: 700;
+  letter-spacing: -0.01em; margin-bottom: 2px;
+}
+.runner-detail-sub { font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
+.runner-detail-now {
+  margin-top: 12px;
+  background: var(--bg); border-radius: 10px;
+  padding: 12px; display: flex; gap: 12px;
+}
+.runner-detail-now-block { flex: 1; }
+.runner-detail-now-label {
+  font-size: 10px; color: var(--ink-3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 3px;
+}
+.runner-detail-now-val {
+  font-family: var(--mono);
+  font-size: 16px; font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.runner-detail-now-sub { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.runner-detail-now-divider { width: 1px; background: var(--line); align-self: stretch; }
+.runner-detail-section {
+  padding: 12px 20px 6px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); flex-shrink: 0;
+}
+.runner-detail-miles {
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1; min-height: 0; padding-bottom: 20px;
+}
+.runner-detail-mile {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.runner-detail-mile.current { background: var(--chip); }
+.runner-detail-mile-num {
+  font-family: var(--mono); font-size: 13px;
+  font-weight: 600; color: var(--ink-2);
+  width: 32px; flex-shrink: 0;
+}
+.runner-detail-mile-body { flex: 1; min-width: 0; }
+.runner-detail-mile-landmark { font-size: 13px; font-weight: 500; color: var(--ink); }
+.runner-detail-mile-range {
+  font-family: var(--mono); font-size: 12px; color: var(--ink);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.runner-detail-mile-range.current { font-weight: 700; }

@@ -79,14 +79,9 @@ MM.timeAtMile = function(runner, mile) {
 MM.PALETTE = [
   '#a855f7', // purple
   '#ef4444', // red
-  '#10b981', // emerald
-  '#f59e0b', // amber
-  '#3b82f6', // blue
-  '#ec4899', // pink
-  '#14b8a6', // teal
-  '#eab308', // yellow
-  '#8b5cf6', // violet
-  '#06b6d4'  // cyan
+  '#10b981', // green
+  '#f59e0b', // orange
+  '#3b82f6'  // blue
 ];
 MM.colorFor = function(index) {
   return MM.PALETTE[index % MM.PALETTE.length];
