@@ -302,43 +302,57 @@ window.LONDON_MARATHON_LANDMARKS = {
   26.2: 'Finish · The Mall'
 };
 
-// Tube / DLR / Elizabeth line stations within ~1km of the route
+// Tube / DLR / Overground / Elizabeth line stations within ~1km of the route
+// Coordinates sourced from OpenStreetMap via Overpass API
 window.TUBE_STATIONS = [
   // Greenwich area (miles 5–7)
-  { name: 'Cutty Sark',       lat: 51.4826, lng: -0.0094, lines: 'DLR' },
-  { name: 'Greenwich',        lat: 51.4779, lng: -0.0147, lines: 'DLR · Elizabeth' },
-  { name: 'Deptford Bridge',  lat: 51.4742, lng: -0.0218, lines: 'DLR' },
-  // Surrey Quays area (miles 8–10)
-  { name: 'Surrey Quays',     lat: 51.4934, lng: -0.0481, lines: 'Overground' },
-  { name: 'Canada Water',     lat: 51.4983, lng: -0.0491, lines: 'Jubilee · Overground' },
-  // Bermondsey / Tower Bridge (miles 11–13)
-  { name: 'Bermondsey',       lat: 51.4795, lng: -0.0637, lines: 'Jubilee' },
-  { name: 'London Bridge',    lat: 51.5054, lng: -0.0860, lines: 'Northern · Jubilee' },
-  { name: 'Borough',          lat: 51.5012, lng: -0.0941, lines: 'Northern' },
-  { name: 'Tower Hill',       lat: 51.5099, lng: -0.0766, lines: 'District · Circle' },
-  { name: 'Wapping',          lat: 51.5048, lng: -0.0565, lines: 'Overground' },
+  { name: 'Cutty Sark',        lat: 51.4817, lng: -0.0108, lines: 'DLR' },
+  { name: 'Greenwich',         lat: 51.4781, lng: -0.0154, lines: 'DLR · Elizabeth' },
+  { name: 'Deptford Bridge',   lat: 51.4742, lng: -0.0224, lines: 'DLR' },
+  // Surrey Quays / Rotherhithe (miles 8–10)
+  { name: 'Rotherhithe',       lat: 51.5008, lng: -0.0520, lines: 'Overground' },
+  { name: 'Surrey Quays',      lat: 51.4934, lng: -0.0478, lines: 'Overground' },
+  { name: 'Canada Water',      lat: 51.4979, lng: -0.0498, lines: 'Jubilee · Overground' },
+  // Wapping / Shadwell
+  { name: 'Wapping',           lat: 51.5044, lng: -0.0560, lines: 'Overground' },
+  { name: 'Shadwell',          lat: 51.5118, lng: -0.0555, lines: 'DLR · Overground' },
+  // Bermondsey / London Bridge (miles 11–13)
+  { name: 'Bermondsey',        lat: 51.4977, lng: -0.0643, lines: 'Jubilee' },
+  { name: 'London Bridge',     lat: 51.5054, lng: -0.0887, lines: 'Northern · Jubilee' },
+  { name: 'Borough',           lat: 51.5011, lng: -0.0933, lines: 'Northern' },
+  { name: 'Southwark',         lat: 51.5039, lng: -0.1050, lines: 'Jubilee' },
+  // Tower area
+  { name: 'Tower Hill',        lat: 51.5099, lng: -0.0767, lines: 'District · Circle' },
+  { name: 'Tower Gateway',     lat: 51.5106, lng: -0.0740, lines: 'DLR' },
+  { name: 'Monument',          lat: 51.5106, lng: -0.0861, lines: 'District · Circle' },
   // Isle of Dogs / Canary Wharf (miles 14–20)
-  { name: 'Westferry',        lat: 51.5101, lng: -0.0278, lines: 'DLR' },
-  { name: 'West India Quay',  lat: 51.5069, lng: -0.0193, lines: 'DLR' },
-  { name: 'Canary Wharf',     lat: 51.5050, lng: -0.0199, lines: 'Jubilee · DLR · Elizabeth' },
-  { name: 'Heron Quays',      lat: 51.5022, lng: -0.0202, lines: 'DLR' },
-  { name: 'South Quay',       lat: 51.4996, lng: -0.0165, lines: 'DLR' },
-  { name: 'Crossharbour',     lat: 51.4948, lng: -0.0151, lines: 'DLR' },
-  { name: 'Mudchute',         lat: 51.4902, lng: -0.0152, lines: 'DLR' },
-  { name: 'Island Gardens',   lat: 51.4875, lng: -0.0091, lines: 'DLR' },
-  { name: 'Poplar',           lat: 51.5143, lng: -0.0165, lines: 'DLR' },
-  // Limehouse / Shadwell (mile 21)
-  { name: 'Limehouse',        lat: 51.5122, lng: -0.0395, lines: 'DLR' },
-  { name: 'Shadwell',         lat: 51.5111, lng: -0.0568, lines: 'DLR · Overground' },
-  // Embankment / City (miles 22–24)
-  { name: 'Blackfriars',      lat: 51.5120, lng: -0.1031, lines: 'District · Circle' },
-  { name: 'Temple',           lat: 51.5113, lng: -0.1141, lines: 'District · Circle' },
-  { name: 'Embankment',       lat: 51.5074, lng: -0.1223, lines: 'Bakerloo · Northern · District · Circle' },
-  { name: 'Waterloo',         lat: 51.5036, lng: -0.1143, lines: 'Bakerloo · Northern · Jubilee' },
+  { name: 'Westferry',         lat: 51.5094, lng: -0.0266, lines: 'DLR' },
+  { name: 'All Saints',        lat: 51.5108, lng: -0.0131, lines: 'DLR' },
+  { name: 'Poplar',            lat: 51.5077, lng: -0.0173, lines: 'DLR' },
+  { name: 'Blackwall',         lat: 51.5079, lng: -0.0072, lines: 'DLR' },
+  { name: 'East India',        lat: 51.5094, lng: -0.0022, lines: 'DLR' },
+  { name: 'West India Quay',   lat: 51.5067, lng: -0.0205, lines: 'DLR' },
+  { name: 'Canary Wharf',      lat: 51.5035, lng: -0.0186, lines: 'Jubilee · DLR · Elizabeth' },
+  { name: 'Heron Quays',       lat: 51.5029, lng: -0.0215, lines: 'DLR' },
+  { name: 'South Quay',        lat: 51.5000, lng: -0.0163, lines: 'DLR' },
+  { name: 'Crossharbour',      lat: 51.4959, lng: -0.0144, lines: 'DLR' },
+  { name: 'Mudchute',          lat: 51.4915, lng: -0.0149, lines: 'DLR' },
+  { name: 'Island Gardens',    lat: 51.4881, lng: -0.0105, lines: 'DLR' },
+  // Limehouse (mile 21)
+  { name: 'Limehouse',         lat: 51.5124, lng: -0.0395, lines: 'DLR' },
+  // City / Embankment (miles 22–24)
+  { name: 'Cannon Street',     lat: 51.5114, lng: -0.0904, lines: 'District · Circle' },
+  { name: 'Mansion House',     lat: 51.5119, lng: -0.0952, lines: 'District · Circle' },
+  { name: 'Blackfriars',       lat: 51.5116, lng: -0.1038, lines: 'District · Circle' },
+  { name: 'Temple',            lat: 51.5109, lng: -0.1143, lines: 'District · Circle' },
+  { name: 'Embankment',        lat: 51.5072, lng: -0.1222, lines: 'Bakerloo · Northern · District · Circle' },
+  { name: 'Charing Cross',     lat: 51.5080, lng: -0.1264, lines: 'Northern · Bakerloo' },
+  { name: 'Waterloo',          lat: 51.5030, lng: -0.1140, lines: 'Bakerloo · Northern · Jubilee' },
   // Westminster / finish (miles 25–26.2)
-  { name: 'Westminster',      lat: 51.5010, lng: -0.1246, lines: 'Jubilee · District · Circle' },
-  { name: "St James's Park",  lat: 51.4994, lng: -0.1335, lines: 'District · Circle' },
-  { name: 'Green Park',       lat: 51.5067, lng: -0.1428, lines: 'Victoria · Jubilee · Piccadilly' },
-  { name: 'Hyde Park Corner', lat: 51.5027, lng: -0.1527, lines: 'Piccadilly' },
+  { name: 'Westminster',       lat: 51.5014, lng: -0.1249, lines: 'Jubilee · District · Circle' },
+  { name: "St James's Park",   lat: 51.4993, lng: -0.1346, lines: 'District · Circle' },
+  { name: 'Victoria',          lat: 51.4964, lng: -0.1432, lines: 'Victoria · Circle · District' },
+  { name: 'Green Park',        lat: 51.5066, lng: -0.1429, lines: 'Victoria · Jubilee · Piccadilly' },
+  { name: 'Hyde Park Corner',  lat: 51.5027, lng: -0.1543, lines: 'Piccadilly' },
 ];
 
