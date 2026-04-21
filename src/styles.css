@@ -400,6 +400,24 @@ html, body {
 .leaflet-container { font-family: var(--sans); background: #e8e4dc; }
 .leaflet-tile-pane { filter: saturate(0.7) brightness(1.02); }
 
+/* Home / reset-view button */
+.map-home-btn {
+  width: 30px;
+  height: 30px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+  line-height: 1;
+}
+.map-home-btn:hover { background: var(--chip); color: var(--ink); }
+
 /* Allow map label icons (0×0 containers) to overflow without clipping */
 .mm-label {
   background: none !important;

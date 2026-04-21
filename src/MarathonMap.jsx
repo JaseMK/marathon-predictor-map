@@ -14,10 +14,18 @@ function MarathonMap({ runners, timeOfDay, showTubeStations }) {
   // Init map once
   useEffect(() => {
     if (mapInstance.current) return;
+
+    const routeLatlngs = LONDON_MARATHON_ROUTE.map(p => [p[1], p[0]]);
+    const routeBounds = L.latLngBounds(routeLatlngs);
+    // ~2 km buffer in each direction around the route
+    const maxBounds = routeBounds.pad(0.12);
+
     const map = L.map(mapRef.current, {
       zoomControl: true,
       attributionControl: true,
-      preferCanvas: false
+      preferCanvas: false,
+      maxBounds,
+      maxBoundsViscosity: 0.85
     }).setView([51.500, -0.055], 12);
     mapInstance.current = map;
 
@@ -25,8 +33,22 @@ function MarathonMap({ runners, timeOfDay, showTubeStations }) {
     runnerLayer.current = L.layerGroup().addTo(map);
     tubeLayer.current = L.layerGroup();
 
-    const bounds = L.latLngBounds(LONDON_MARATHON_ROUTE.map(p => [p[1], p[0]]));
+    const bounds = routeBounds;
     map.fitBounds(bounds, { padding: [48, 48] });
+
+    // Home button — resets pan/zoom to the full route view
+    const HomeControl = L.Control.extend({
+      options: { position: 'bottomright' },
+      onAdd(m) {
+        const btn = L.DomUtil.create('button', 'map-home-btn');
+        btn.title = 'Reset view';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1L1 7.5V15h5v-4h4v4h5V7.5L8 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg>';
+        L.DomEvent.disableClickPropagation(btn);
+        L.DomEvent.on(btn, 'click', () => m.fitBounds(bounds, { padding: [48, 48] }));
+        return btn;
+      }
+    });
+    new HomeControl().addTo(map);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '© OSM · CARTO', subdomains: 'abcd', maxZoom: 19
