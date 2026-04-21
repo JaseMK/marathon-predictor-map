@@ -69,6 +69,11 @@ html, body {
   color: var(--ink-3);
   margin-left: 2px;
 }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .race-date {
   font-family: var(--mono);
   font-size: 12px;
@@ -309,6 +314,88 @@ html, body {
 .time-range { color: var(--ink); }
 .time-cell.next { color: var(--accent); font-weight: 600; }
 
+/* ============ Tube toggle button ============ */
+.btn-tube-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  color: var(--ink-2);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btn-tube-toggle:hover { background: var(--chip); color: var(--ink); }
+.btn-tube-toggle.active {
+  background: #1c3d8f;
+  color: white;
+  border-color: #1c3d8f;
+}
+.tube-toggle-roundel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  position: relative;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.btn-tube-toggle.active .tube-toggle-roundel { border-color: white; opacity: 1; }
+.tube-toggle-bar {
+  display: block;
+  position: absolute;
+  left: -2px; right: -2px;
+  height: 2.5px;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+/* ============ Tube station markers ============ */
+.tube-station-icon {
+  background: none !important;
+  border: none !important;
+  overflow: visible !important;
+}
+.tube-roundel {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2.5px solid #dc241f;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.tube-bar {
+  position: absolute;
+  left: -3px; right: -3px;
+  height: 3px;
+  background: #003888;
+}
+.tube-tooltip {
+  background: white !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+.tube-tooltip::before { display: none !important; }
+.tube-tooltip-inner {
+  padding: 6px 9px;
+  font-family: var(--sans);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.tube-tt-name { font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.tube-tt-lines { color: var(--ink-3); font-size: 10px; }
+
 /* ============ Leaflet ============ */
 .leaflet-container { font-family: var(--sans); background: #e8e4dc; }
 .leaflet-tile-pane { filter: saturate(0.7) brightness(1.02); }
@@ -319,6 +406,13 @@ html, body {
   border: none !important;
   overflow: visible !important;
   position: relative !important;
+}
+
+/* Mile marker icons — overflow visible so label text clears the 8×8 box */
+.mile-marker-icon {
+  background: none !important;
+  border: none !important;
+  overflow: visible !important;
 }
 
 /* Mile hover tooltip */
@@ -439,15 +533,19 @@ html, body {
 /* ============ Mobile (≤ 768px) ============ */
 @media (max-width: 768px) {
   /* Layout */
+  html, body { height: 100%; overflow: hidden; }
   .app {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
   }
   .header {
-    height: 50px;
-    padding: 0 16px;
+    height: calc(50px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 16px 0;
     flex-shrink: 0;
   }
   .sidebar { display: none; }
@@ -485,13 +583,8 @@ html, body {
   .time-value { font-size: 22px; }
   .time-label { font-size: 9px; }
 
-  /* Leaflet — move zoom control above sheet, hide attribution */
-  .leaflet-top.leaflet-left {
-    top: auto !important;
-    bottom: 190px;
-    right: 12px;
-    left: auto;
-  }
+  /* Leaflet — hide zoom control (use pinch) and attribution on mobile */
+  .leaflet-control-zoom { display: none !important; }
   .leaflet-control-attribution { display: none !important; }
 
   /* Mobile bottom sheet */
@@ -505,6 +598,7 @@ html, body {
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
     z-index: 500;
     max-height: 52%;
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .mobile-sheet-grip {
     width: 40px; height: 4px; border-radius: 2px;

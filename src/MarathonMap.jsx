@@ -1,11 +1,12 @@
 /* global React, L */
 const { useEffect, useRef } = React;
 
-function MarathonMap({ runners, timeOfDay }) {
+function MarathonMap({ runners, timeOfDay, showTubeStations }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const runnerLayer = useRef(null);
   const staticLayer = useRef(null);
+  const tubeLayer = useRef(null);
   // Keep a live ref to runners so static-layer tooltip functions always see current data
   const runnersRef = useRef(runners);
   useEffect(() => { runnersRef.current = runners; }, [runners]);
@@ -22,6 +23,7 @@ function MarathonMap({ runners, timeOfDay }) {
 
     staticLayer.current = L.layerGroup().addTo(map);
     runnerLayer.current = L.layerGroup().addTo(map);
+    tubeLayer.current = L.layerGroup();
 
     const bounds = L.latLngBounds(LONDON_MARATHON_ROUTE.map(p => [p[1], p[0]]));
     map.fitBounds(bounds, { padding: [48, 48] });
@@ -52,12 +54,18 @@ function MarathonMap({ runners, timeOfDay }) {
 
     // Mile dots — tooltip built dynamically from runnersRef so it always reflects
     // the current runner list without needing to redraw the static layer
-    const mileDotIcon = L.divIcon({
-      className: '',
-      html: '<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid #4a5159;box-sizing:border-box;"></div>',
-      iconSize: [8, 8],
-      iconAnchor: [4, 4]
-    });
+    function buildMileIcon(m) {
+      const label = m === 26.2 ? '' : m;
+      return L.divIcon({
+        className: 'mile-marker-icon',
+        html: `<div style="position:relative;width:8px;height:8px;">` +
+          (label ? `<div style="position:absolute;bottom:11px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:600;color:#4a5159;font-family:ui-monospace,'SF Mono',Menlo,monospace;white-space:nowrap;line-height:1;">${label}</div>` : '') +
+          `<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid #4a5159;box-sizing:border-box;"></div>` +
+          `</div>`,
+        iconSize: [8, 8],
+        iconAnchor: [4, 4]
+      });
+    }
 
     function buildMileTooltip(mile) {
       const rs = runnersRef.current;
@@ -82,7 +90,7 @@ function MarathonMap({ runners, timeOfDay }) {
     for (let m = 1; m <= 26; m++) {
       const pos = positionAtMile(m);
       L.marker([pos[1], pos[0]], {
-        icon: mileDotIcon, interactive: true, zIndexOffset: 100
+        icon: buildMileIcon(m), interactive: true, zIndexOffset: 100
       }).bindTooltip(() => buildMileTooltip(m), {
         direction: 'top', offset: [0, -6], className: 'mile-tooltip'
       }).addTo(staticLayer.current);
@@ -90,7 +98,7 @@ function MarathonMap({ runners, timeOfDay }) {
     // Finish dot (26.2)
     const finishPos = positionAtMile(26.2);
     L.marker([finishPos[1], finishPos[0]], {
-      icon: mileDotIcon, interactive: true, zIndexOffset: 100
+      icon: buildMileIcon(26.2), interactive: true, zIndexOffset: 100
     }).bindTooltip(() => buildMileTooltip(26.2), {
       direction: 'top', offset: [0, -6], className: 'mile-tooltip'
     }).addTo(staticLayer.current);
@@ -108,6 +116,35 @@ function MarathonMap({ runners, timeOfDay }) {
       zIndexOffset: 600
     }).addTo(staticLayer.current);
   }, []);
+
+  // Tube stations layer — populate once lazily, toggle on showTubeStations
+  useEffect(() => {
+    const map = mapInstance.current;
+    const layer = tubeLayer.current;
+    if (!map || !layer) return;
+
+    if (showTubeStations) {
+      if (layer.getLayers().length === 0) {
+        TUBE_STATIONS.forEach(s => {
+          const icon = L.divIcon({
+            className: 'tube-station-icon',
+            html: '<div class="tube-roundel"><div class="tube-bar"></div></div>',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+          L.marker([s.lat, s.lng], { icon, zIndexOffset: 200 })
+            .bindTooltip(
+              `<div class="tube-tooltip-inner"><div class="tube-tt-name">${s.name}</div><div class="tube-tt-lines">${s.lines}</div></div>`,
+              { direction: 'top', offset: [0, -9], className: 'tube-tooltip' }
+            )
+            .addTo(layer);
+        });
+      }
+      layer.addTo(map);
+    } else {
+      map.removeLayer(layer);
+    }
+  }, [showTubeStations]);
 
   // Update runner markers on every tick
   useEffect(() => {

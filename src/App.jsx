@@ -5,10 +5,10 @@ function newRunnerId() { return 'r_' + Math.random().toString(36).slice(2, 8); }
 
 const SAMPLE_RUNNER = {
   id: 'r_sample',
-  name: 'Sam',
+  name: 'Runner 1',
   waveStart: '10:00',
-  bestTime: '3:45:00',
-  worstTime: '4:30:00',
+  bestTime: '4:00:00',
+  worstTime: '4:15:00',
   color: MM.PALETTE[0]
 };
 
@@ -91,6 +91,7 @@ function App() {
   const [detailRunner, setDetailRunner] = useState(null);
   const [editDrawer, setEditDrawer] = useState(null);
   const [showMileTable, setShowMileTable] = useState(false);
+  const [showTubeStations, setShowTubeStations] = useState(false);
 
   useEffect(() => {
     try { localStorage.setItem('mm_runners', JSON.stringify(runners)); } catch(e) {}
@@ -163,15 +164,27 @@ function App() {
     // Header
     React.createElement('div', { className: 'header' },
       React.createElement('div', { className: 'brand' },
-        React.createElement('div', { className: 'brand-mark' }, 'M'),
+        React.createElement('div', { className: 'brand-mark' }, 'JC'),
         React.createElement('div', null,
-          'Prediction Map',
+          'Spectator Map',
           React.createElement('span', { className: 'brand-sub' }, ' · London Marathon')
         )
       ),
-      React.createElement('div', { className: 'race-date' },
-        React.createElement('span', { className: 'dot' }),
-        'Sun 26 Apr 2026'
+      React.createElement('div', { className: 'header-right' },
+        React.createElement('button', {
+          className: 'btn-tube-toggle' + (showTubeStations ? ' active' : ''),
+          onClick: () => setShowTubeStations(t => !t),
+          title: 'Toggle tube stations'
+        },
+          React.createElement('span', { className: 'tube-toggle-roundel' },
+            React.createElement('span', { className: 'tube-toggle-bar' })
+          ),
+          'Tube'
+        ),
+        React.createElement('div', { className: 'race-date' },
+          React.createElement('span', { className: 'dot' }),
+          'Sun 26 Apr 2026'
+        )
       )
     ),
     // Sidebar (desktop only)
@@ -194,7 +207,7 @@ function App() {
     // Main
     React.createElement('div', { className: 'main' },
       React.createElement('div', { className: 'map-wrap' },
-        React.createElement(MarathonMap, { runners, timeOfDay }),
+        React.createElement(MarathonMap, { runners, timeOfDay, showTubeStations }),
         React.createElement(MobileSheet, {
           runners, timeOfDay,
           onSelectRunner: r => setDetailRunner(r),
