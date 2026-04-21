@@ -85,7 +85,7 @@ function RunnerCard({ runner, index, timeOfDay, onUpdate, onRemove }) {
         className: 'btn-link danger',
         onClick: () => onRemove(runner.id),
         title: 'Remove runner'
-      }, 'Remove')
+      }, '🗑 Remove')
     )
   );
 }
