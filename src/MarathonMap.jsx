@@ -80,10 +80,7 @@ function MarathonMap({ runners, timeOfDay, showTubeStations }) {
       const label = m === 26.2 ? '' : m;
       return L.divIcon({
         className: 'mile-marker-icon',
-        html: `<div style="position:relative;width:8px;height:8px;">` +
-          (label ? `<div style="position:absolute;bottom:11px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:600;color:#4a5159;font-family:ui-monospace,'SF Mono',Menlo,monospace;white-space:nowrap;line-height:1;">${label}</div>` : '') +
-          `<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid #4a5159;box-sizing:border-box;"></div>` +
-          `</div>`,
+        html: `<div class="mm-mile-wrap">${label ? `<div class="mm-mile-num">${label}</div>` : ''}<div class="mm-mile-dot"></div></div>`,
         iconSize: [8, 8],
         iconAnchor: [4, 4]
       });
@@ -187,8 +184,7 @@ function MarathonMap({ runners, timeOfDay, showTubeStations }) {
         const anchor = size / 2;
         const startTime = MM.fmtTimeOfDay(MM.parseTime(runner.waveStart));
         const waitStr = MM.fmtDuration(-info.elapsed);
-        const nameTag = `<div style="position:absolute;bottom:${size + 4}px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;font-family:var(--sans,sans-serif);box-shadow:0 1px 3px rgba(0,0,0,0.2);pointer-events:none;opacity:0.65;">${runner.name || 'Runner'}</div>`;
-        const html = `<div style="position:relative;width:${size}px;height:${size}px;"><div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.2),0 2px 4px rgba(0,0,0,0.2);opacity:0.35;"></div>${nameTag}</div>`;
+        const html = `<div class="mm-dot-wrap" style="--c:${color}"><div class="mm-dot mm-dot-pre"></div><div class="mm-name-tag mm-name-tag-pre">${runner.name || 'Runner'}</div></div>`;
         const tooltipHtml = `<div class="runner-tooltip-inner"><div class="rtt-name">${runner.name || 'Runner'}</div><div class="rtt-row"><span class="rtt-label">Status</span><span>Not started</span></div><div class="rtt-row"><span class="rtt-label">Wave</span><span>${startTime}</span></div><div class="rtt-row"><span class="rtt-label">Starts in</span><span>${waitStr}</span></div></div>`;
         L.marker(ll, {
           icon: L.divIcon({ className: '', html, iconSize: [size, size], iconAnchor: [anchor, anchor] }),
@@ -221,24 +217,18 @@ function MarathonMap({ runners, timeOfDay, showTubeStations }) {
       const todStr = MM.fmtTimeOfDay(timeOfDay);
 
       [
-        { mi: info.best,   key: 'best',   label: 'Best',     size: 12 },
-        { mi: info.middle, key: 'middle', label: 'Expected', size: 16 },
-        { mi: info.worst,  key: 'worst',  label: 'Worst',    size: 12 }
+        { mi: info.best,   key: 'best',   label: 'Best',     size: 12, cls: 'mm-dot-best' },
+        { mi: info.middle, key: 'middle', label: 'Expected', size: 16, cls: 'mm-dot-middle' },
+        { mi: info.worst,  key: 'worst',  label: 'Worst',    size: 12, cls: 'mm-dot-worst' }
       ].forEach(p => {
         if (p.mi <= 0) return;
         const pos = positionAtMile(p.mi);
         const ll = [pos[1], pos[0]];
-        const opacity = p.key === 'middle' ? 1 : (p.key === 'best' ? 0.85 : 0.55);
         const anchor = p.size / 2;
-
         const nameTag = p.key === 'middle'
-          ? `<div style="position:absolute;bottom:${p.size + 4}px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;font-family:var(--sans,sans-serif);box-shadow:0 1px 3px rgba(0,0,0,0.2);pointer-events:none;">${runner.name || 'Runner'}</div>`
+          ? `<div class="mm-name-tag">${runner.name || 'Runner'}</div>`
           : '';
-
-        const html = `<div style="position:relative;width:${p.size}px;height:${p.size}px;">
-          <div style="width:${p.size}px;height:${p.size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.2),0 2px 4px rgba(0,0,0,0.2);opacity:${opacity};"></div>
-          ${nameTag}
-        </div>`;
+        const html = `<div class="mm-dot-wrap" style="--c:${color}"><div class="mm-dot ${p.cls}"></div>${nameTag}</div>`;
 
         const tooltipHtml =
           `<div class="runner-tooltip-inner">` +

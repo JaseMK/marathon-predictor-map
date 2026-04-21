@@ -418,6 +418,46 @@ html, body {
 }
 .map-home-btn:hover { background: var(--chip); color: var(--ink); }
 
+/* ============ Marker primitives ============ */
+/* Mile markers */
+.mm-mile-wrap { position: relative; width: 8px; height: 8px; }
+.mm-mile-num {
+  position: absolute; bottom: 11px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: 600; color: #4a5159;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  white-space: nowrap; line-height: 1;
+}
+.mm-mile-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #fff; border: 1.5px solid #4a5159; box-sizing: border-box;
+}
+
+/* Runner dots — colour passed via --c custom property */
+.mm-dot-wrap { position: relative; display: inline-block; }
+.mm-dot {
+  display: block; border-radius: 50%;
+  background: var(--c);
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.2);
+}
+.mm-dot-middle { width: 16px; height: 16px; }
+.mm-dot-best   { width: 12px; height: 12px; opacity: 0.85; }
+.mm-dot-worst  { width: 12px; height: 12px; opacity: 0.55; }
+.mm-dot-pre    { width: 16px; height: 16px; opacity: 0.35; }
+
+/* Runner name tag above the dot */
+.mm-name-tag {
+  position: absolute; bottom: calc(100% + 4px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--c); color: white;
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; white-space: nowrap;
+  font-family: var(--sans, sans-serif);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  pointer-events: none;
+}
+.mm-name-tag-pre { opacity: 0.65; }
+
 /* Allow map label icons (0×0 containers) to overflow without clipping */
 .mm-label {
   background: none !important;
